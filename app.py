@@ -7,9 +7,9 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "submitted_forms"
-EMAIL_SENDER = "your_email@example.com"
-EMAIL_PASSWORD = "your_email_password"
-EMAIL_RECEIVER = "receiver_email@example.com"
+EMAIL_SENDER = "rhtindia123@gmail.com"
+EMAIL_PASSWORD = "odmx pabh lvtg srwj"  # Use an App Password if using Gmail
+EMAIL_RECEIVER = "rhtrivedi92@outlook.com"
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -24,20 +24,30 @@ def home():
 def upload_file():
     print("🔄 Received request from PDF form...")
 
-    if "pdf" not in request.files:
-        return jsonify({"error": "No file part in request"}), 400
+    # Debugging: Print request headers
+    print(f"📥 Request Headers: {request.headers}")
 
-    file = request.files["pdf"]
+    # Check if the request contains a PDF file (Acrobat sends raw PDF data)
+    if request.content_type != "application/pdf":
+        print("❌ Error: Incorrect Content-Type! Expected application/pdf")
+        return jsonify({"error": "Invalid Content-Type. Expected application/pdf"}), 400
 
-    if file.filename == "":
-        return jsonify({"error": "No selected file"}), 400
+    # Read the raw PDF data
+    pdf_data = request.data
+    if not pdf_data:
+        print("❌ Error: No data received in request!")
+        return jsonify({"error": "No data received"}), 400
 
-    filename = secure_filename(file.filename)
+    # Save the raw PDF file
+    filename = "submitted_form.pdf"
     file_path = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(file_path)
 
-    print(f"✅ File {filename} saved successfully!")
+    with open(file_path, "wb") as f:
+        f.write(pdf_data)
 
+    print(f"✅ File saved successfully at {file_path}")
+
+    # Send email with the attached PDF
     send_email(file_path, filename)
 
     return jsonify({"message": "Form submitted successfully!"}), 200
@@ -65,4 +75,4 @@ def send_email(pdf_path, filename):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)
