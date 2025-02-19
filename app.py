@@ -8,10 +8,9 @@ app = Flask(__name__)
 
 UPLOAD_FOLDER = "submitted_forms"
 EMAIL_SENDER = "your_email@example.com"
-EMAIL_PASSWORD = "your_email_password"  # Use App Password if using Gmail
+EMAIL_PASSWORD = "your_email_password"
 EMAIL_RECEIVER = "receiver_email@example.com"
 
-# Ensure the upload folder exists
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
@@ -23,16 +22,21 @@ def home():
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
-    if "pdf" not in request.files:
-        return jsonify({"error": "No file found"}), 400
+    print("🔄 Received request from PDF form...")
 
-    file = request.files["pdf"]  # Get the uploaded file
+    if "pdf" not in request.files:
+        return jsonify({"error": "No file part in request"}), 400
+
+    file = request.files["pdf"]
+
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
 
     filename = secure_filename(file.filename)
     file_path = os.path.join(UPLOAD_FOLDER, filename)
     file.save(file_path)
+
+    print(f"✅ File {filename} saved successfully!")
 
     send_email(file_path, filename)
 
