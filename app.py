@@ -3,8 +3,10 @@ import os
 import smtplib
 from email.message import EmailMessage
 from werkzeug.utils import secure_filename
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 UPLOAD_FOLDER = "submitted_forms"
 EMAIL_SENDER = "rhtindia123@gmail.com"
@@ -23,34 +25,44 @@ def home():
 @app.route("/upload", methods=["POST"])
 def upload_file():
     print("🔄 Received request from PDF form...")
-
-    # Debugging: Print request headers
     print(f"📥 Request Headers: {request.headers}")
 
-    # Check if the request contains a PDF file (Acrobat sends raw PDF data)
-    if request.content_type != "application/pdf":
-        print("❌ Error: Incorrect Content-Type! Expected application/pdf")
-        return jsonify({"error": "Invalid Content-Type. Expected application/pdf"}), 400
+    # Handle Raw PDF Data (Adobe Desktop)
+    if request.content_type == "application/pdf":
+        pdf_data = request.data
+        if not pdf_data:
+            print("❌ Error: No data received!")
+            return "<h1>Error: No data received</h1>", 400
 
-    # Read the raw PDF data
-    pdf_data = request.data
-    if not pdf_data:
-        print("❌ Error: No data received in request!")
-        return jsonify({"error": "No data received"}), 400
+        filename = "submitted_form.pdf"
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
 
-    # Save the raw PDF file
-    filename = "submitted_form.pdf"
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
+        with open(file_path, "wb") as f:
+            f.write(pdf_data)
 
-    with open(file_path, "wb") as f:
-        f.write(pdf_data)
+        print(f"✅ File saved at {file_path}")
+        send_email(file_path, filename)
+        return "<h1>Form submitted successfully!</h1>", 200
 
-    print(f"✅ File saved successfully at {file_path}")
+    # Handle File Uploads (Mobile/Web Adobe)
+    elif request.content_type.startswith("multipart/form-data"):
+        if "file" not in request.files:
+            print("❌ Error: No file received in request.files!")
+            return "<h1>Error: No file received!</h1>", 400
 
-    # Send email with the attached PDF
-    send_email(file_path, filename)
+        file = request.files["file"]
+        filename = file.filename if file.filename else "submitted_form.pdf"
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(file_path)
 
-    return jsonify({"message": "Form submitted successfully!"}), 200
+        print(f"✅ File uploaded at {file_path}")
+        send_email(file_path, filename)
+        return "<h1>Form submitted successfully!</h1>", 200
+
+    # Unknown Content-Type
+    else:
+        print("❌ Error: Unsupported Content-Type")
+        return "<h1>Error: Unsupported Content-Type</h1>", 400
 
 
 def send_email(pdf_path, filename):
