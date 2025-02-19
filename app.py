@@ -16,7 +16,7 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def home():
     return "PDF Submission API is Running!"
 
