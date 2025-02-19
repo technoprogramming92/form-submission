@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 UPLOAD_FOLDER = "submitted_forms"
 EMAIL_SENDER = "rhtindia123@gmail.com"
-EMAIL_PASSWORD = "qmvs zkuv dnle yepp"
+EMAIL_PASSWORD = "qmvszkuvdnleyepp"
 EMAIL_RECEIVER = "rhtindia123@gmail.com"
 
 # Ensure the upload folder exists
