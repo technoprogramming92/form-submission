@@ -7,9 +7,9 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "submitted_forms"
-EMAIL_SENDER = "rhtindia123@gmail.com"
-EMAIL_PASSWORD = "qmvszkuvdnleyepp"
-EMAIL_RECEIVER = "rhtindia123@gmail.com"
+EMAIL_SENDER = "your_email@example.com"
+EMAIL_PASSWORD = "your_email_password"  # Use App Password if using Gmail
+EMAIL_RECEIVER = "receiver_email@example.com"
 
 # Ensure the upload folder exists
 if not os.path.exists(UPLOAD_FOLDER):
@@ -26,7 +26,10 @@ def upload_file():
     if "pdf" not in request.files:
         return jsonify({"error": "No file found"}), 400
 
-    file = request.files["pdf"]
+    file = request.files["pdf"]  # Get the uploaded file
+    if file.filename == "":
+        return jsonify({"error": "No selected file"}), 400
+
     filename = secure_filename(file.filename)
     file_path = os.path.join(UPLOAD_FOLDER, filename)
     file.save(file_path)
