@@ -27,8 +27,14 @@ def upload_file():
     print("🔄 Received request from PDF form...")
     print(f"📥 Request Headers: {request.headers}")
 
-    # Handle Raw PDF Data (Adobe Desktop)
-    if request.content_type == "application/pdf":
+    # ✅ Fix: Check if Content-Type is None before calling .startswith()
+    content_type = request.content_type
+    if not content_type:
+        print("❌ Error: No Content-Type in request!")
+        return "<h1>Error: No Content-Type in request</h1>", 400
+
+    # ✅ Handle Raw PDF Data (Adobe Desktop)
+    if content_type == "application/pdf":
         pdf_data = request.data
         if not pdf_data:
             print("❌ Error: No data received!")
@@ -44,8 +50,8 @@ def upload_file():
         send_email(file_path, filename)
         return "<h1>Form submitted successfully!</h1>", 200
 
-    # Handle File Uploads (Mobile/Web Adobe)
-    elif request.content_type.startswith("multipart/form-data"):
+    # ✅ Handle File Uploads (Mobile/Web Adobe)
+    elif content_type.startswith("multipart/form-data"):
         if "file" not in request.files:
             print("❌ Error: No file received in request.files!")
             return "<h1>Error: No file received!</h1>", 400
@@ -59,10 +65,9 @@ def upload_file():
         send_email(file_path, filename)
         return "<h1>Form submitted successfully!</h1>", 200
 
-    # Unknown Content-Type
-    else:
-        print("❌ Error: Unsupported Content-Type")
-        return "<h1>Error: Unsupported Content-Type</h1>", 400
+    # ❌ Handle Unknown Content-Type
+    print(f"❌ Error: Unsupported Content-Type {content_type}")
+    return f"<h1>Error: Unsupported Content-Type {content_type}</h1>", 400
 
 
 def send_email(pdf_path, filename):
