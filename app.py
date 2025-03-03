@@ -9,9 +9,9 @@ app = Flask(__name__)
 CORS(app)
 
 UPLOAD_FOLDER = "submitted_forms"
-EMAIL_SENDER = "rhtindia123@gmail.com"
-EMAIL_PASSWORD = "odmx pabh lvtg srwj"  # Use an App Password if using Gmail
-EMAIL_RECEIVER = "rhtrivedi92@outlook.com"
+EMAIL_SENDER = "eayashshah@gmail.com"
+EMAIL_PASSWORD = "cujs dfld hfta egjp"  # Use an App Password if using Gmail
+EMAIL_RECEIVER = "eayashshah@gmail.com"
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
